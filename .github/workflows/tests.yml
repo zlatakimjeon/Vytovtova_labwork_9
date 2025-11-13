@@ -6,25 +6,32 @@ on:
 
 jobs:
   build:
-    name: Build and run tests on ${{ matrix.os }}
+    name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup MinGW (Windows only)
+      - name: Install MinGW (Windows only)
         if: runner.os == 'Windows'
         uses: egor-tensin/setup-mingw@v2
         with:
           platform: x64
 
-      - name: Build project
+      - name: Clean build directories
+        run: make clean || true
+
+      - name: Build library and tests
         run: make all
 
       - name: Run tests
         run: |
-          ./test/run || test\run.exe
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            ./test/run.exe
+          else
+            ./test/run
+          fi
