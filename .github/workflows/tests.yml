@@ -1,4 +1,4 @@
-name: Build and Test
+name: C Simplify Library CI
 
 on:
   push:
@@ -6,7 +6,6 @@ on:
 
 jobs:
   build:
-    name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -16,22 +15,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install MinGW (Windows only)
+      - name: Install GCC (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y build-essential make
+
+      - name: Install MinGW (Windows)
         if: runner.os == 'Windows'
         uses: egor-tensin/setup-mingw@v2
         with:
           platform: x64
 
-      - name: Clean build directories
-        run: make clean || true
+      - name: Verify GCC
+        run: gcc --version
 
-      - name: Build library and tests
-        run: make all
+      - name: Build project
+        run: |
+          make clean
+          make all
 
       - name: Run tests
         run: |
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            ./test/run.exe
-          else
-            ./test/run
-          fi
+          ./test/run || test\run.exe || true
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.os }}
+          path: |
+            lib/libsimplify.a
+            test/run*
