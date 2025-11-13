@@ -31,9 +31,8 @@ $(OBJ_DIR)/test.o: $(TEST_SRC) | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 test: $(TEST_OBJ) $(LIB)
-	$(CC) $^ -L$(LIB_DIR) -lsimplify -o $(TEST_BIN)
+	$(CC) $(TEST_OBJ) $(LIB) -o $(TEST_BIN)
 
-# Очистка
 clean:
 	if exist $(OBJ_DIR)\*.o del /Q $(OBJ_DIR)\*.o
 	if exist $(LIB_DIR)\libsimplify.a del /Q $(LIB_DIR)\libsimplify.a
