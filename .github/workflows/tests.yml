@@ -17,7 +17,9 @@ jobs:
 
       - name: Install GCC (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y build-essential make
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential make
 
       - name: Install MinGW (Windows)
         if: runner.os == 'Windows'
@@ -25,7 +27,7 @@ jobs:
         with:
           platform: x64
 
-      - name: Verify GCC
+      - name: Verify compiler
         run: gcc --version
 
       - name: Build project
@@ -34,8 +36,13 @@ jobs:
           make all
 
       - name: Run tests
+        shell: bash
         run: |
-          ./test/run || test\run.exe || true
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            ./test/run.exe || exit 1
+          else
+            ./test/run || exit 1
+          fi
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
