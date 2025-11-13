@@ -15,19 +15,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install GCC (Linux)
+      - name: Install GCC on Linux
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential make
 
-      - name: Install MinGW (Windows)
+      - name: Install MinGW manually
         if: runner.os == 'Windows'
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x64
+        shell: bash
+        run: |
+          echo "Downloading MinGW..."
+          curl -L -o mingw.7z https://github.com/niXman/mingw-builds-binaries/releases/download/15.2.0-rt_v13-rev0/x86_64-15.2.0-release-posix-seh-ucrt-rt_v13-rev0.7z
+          7z x mingw.7z -oC:/mingw64 > /dev/null
+          echo "Adding MinGW to PATH"
+          echo "C:/mingw64/mingw64/bin" >> $GITHUB_PATH
 
-      - name: Verify compiler
+      - name: Verify GCC
         run: gcc --version
 
       - name: Build project
